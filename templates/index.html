@@ -1,11 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-</head>
-<body>
-    <h1>Hello World</h1>
-</body>
-</html>
+<!-- index.html -->
+{% extends "layout.html" %}
+
+{% block title %}Home - Pantry Management{% endblock %}
+
+{% block content %}
+  <section id="upload">
+    <h2 class="mb-4">Upload Food Image or Barcode</h2>
+    <form>
+      <div class="form-group">
+        <input type="file" class="form-control-file" id="fileUpload" accept="image/*">
+      </div>
+      <button type="button" class="btn btn-primary mt-2">Upload and Scan</button>
+    </form>
+  </section>
+
+  <section id="pantry">
+    <h2>My Pantry</h2>
+    <div class="row" id="pantryItems">
+      <!-- Example pantry items; dynamically rendered here -->
+      <div class="col-md-3 mt-3">
+        <div class="card">
+          <img src="placeholder.jpg" class="card-img-top" alt="Item Image">
+          <div class="card-body">
+            <h5 class="card-title">Item Name</h5>
+            <p class="card-text">Expires: Date</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="recommendations" class="mt-5">
+    <h2>Recipe Recommendations</h2>
+    <div class="row" id="recipeList">
+      <!-- Example recipe card (can be generated dynamically) -->
+      <div class="col-md-4 mt-3">
+        <div class="card">
+          <img src="recipe_placeholder.jpg" class="card-img-top" alt="Recipe Image">
+          <div class="card-body">
+            <h5 class="card-title">Recipe Name</h5>
+            <p class="card-text">Ingredients: List of Ingredients</p>
+            <a href="#" class="btn btn-primary">View Recipe</a>
+          </div>
+        </div>
+      </div>
+      <!-- Additional recipe cards can be added here -->
+    </div>
+  </section>
+{% endblock %}
