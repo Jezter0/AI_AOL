@@ -37,15 +37,21 @@
       {% for recipe in recipes %}
         <div class="col-md-4 mt-3">
           <div class="card">
-            <img src="{{ recipe.image_url }}" class="card-img-top" alt="{{ recipe.name }}">
+            <img src="{{ recipe.image }}" class="card-img-top" alt="{{ recipe.title }}">
             <div class="card-body">
-              <h5 class="card-title">{{ recipe.name }}</h5>
-              <p class="card-text">Ingredients: {{ recipe.ingredients }}</p>
-              <a href="{{ recipe.url }}" class="btn btn-primary">View Recipe</a>
+              <h5 class="card-title">{{ recipe.title }}</h5>
+              <p class="card-text">Ingredients: 
+                {% for ingredient in recipe.usedIngredients %}
+                  {{ ingredient.name }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+              </p>
+              <a href="https://spoonacular.com/recipes/{{ recipe.title | replace(' ', '-') }}-{{ recipe.id }}" 
+                 class="btn btn-primary" 
+                 target="_blank">View Recipe</a>
             </div>
           </div>
         </div>
       {% endfor %}
     </div>
   </section>
-{% endblock %}
+  {% endblock %}

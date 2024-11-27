@@ -8,6 +8,7 @@ from clarifai.client.model import Model
 from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
 from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
 import bcrypt
+import requests
 from datetime import datetime
 
 from helpers import login_required
@@ -86,9 +87,25 @@ def index():
 
     # Fetch pantry items for the current user from the database
     pantry_items = PantryItem.query.filter_by(user_id=session['user_id']).order_by(PantryItem.id.desc()).limit(4).all()
+    pantry_ingredients = ",".join([item.name for item in pantry_items])
+
+    try:
+        response = requests.get(
+            "https://api.spoonacular.com/recipes/findByIngredients",
+            params={
+                "ingredients": pantry_ingredients,
+                "number": 5,  # Number of recipes to fetch
+                "apiKey": "0e2a90d7b5514510ac91413e1d1a9669"
+            }
+        )
+        recipes = response.json() if response.status_code == 200 else []
+
+    except Exception as e:
+        print(f"Error fetching recipes: {str(e)}")
+        recipes = []
 
     # Render the template and pass the pantry items for display
-    return render_template('index.html', pantry_items=pantry_items, recipes=[])
+    return render_template('index.html', pantry_items=pantry_items, recipes=recipes)
 
 
 @app.route('/pantry', methods=['GET', 'POST'])
