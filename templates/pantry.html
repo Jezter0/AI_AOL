@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    My Pantry
+{% endblock %}
+
+{% block content %}
+    <h2>My Pantry</h2>
+    <div class="row" id="pantryItems">
+    {% for item in pantry_items %}
+        <div class="col-md-3 mt-3">
+        <div class="card">
+            <img src="{{ item.image_path }}" class="card-img-top" alt="{{ item.name }}">
+            <div class="card-body">
+            <h5 class="card-title">{{ item.name }}</h5>
+            <p class="card-text">Expires: {{ item.expiry_date }}</p>
+            </div>
+        </div>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock %}
