@@ -91,6 +91,14 @@ def index():
     return render_template('index.html', pantry_items=pantry_items, recipes=[])
 
 
+@app.route('/pantry', methods=['GET', 'POST'])
+@login_required
+def pantry():
+    pantry_items = PantryItem.query.filter_by(user_id=session['user_id'])
+
+    return render_template('pantry.html', pantry_items=pantry_items)
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
