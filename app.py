@@ -4,12 +4,17 @@ from flask import Flask, request, render_template, redirect, url_for, flash, ses
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum, func
+from clarifai.client.model import Model
+from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
+from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
 import bcrypt
+from datetime import datetime
 
 from helpers import login_required
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///manager.db'
+app.config['UPLOAD_FOLDER'] = './static/uploads'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
@@ -21,11 +26,69 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+    pantry_items = db.relationship('PantryItem', backref='user', lazy=True)
 
-@app.route('/')
+class PantryItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    image_path = db.Column(db.String(200), nullable=False)
+    expiry_date = db.Column(db.Date, nullable=True)
+
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
+
+
+@app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
-    return render_template('index.html')
+    if request.method == 'POST':
+        uploaded_file = request.files['image']
+        
+        # Check if file was uploaded and has a valid extension
+        if uploaded_file and uploaded_file.filename.lower().endswith(('.jpg', '.jpeg', '.png')):
+            # Generate a unique file name to avoid conflicts
+            filename = uploaded_file.filename
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+            # Save the uploaded file to the upload folder
+            uploaded_file.save(file_path)
+
+            # Use Clarifai to recognize the food item
+            try:
+                PAT = "ebd6c5aeea1d4656962de8aff353ffff"  # Your Clarifai API Key
+                model_url = "https://clarifai.com/clarifai/main/models/food-item-recognition"
+
+                model_prediction = Model(url=model_url, pat=PAT).predict_by_filepath(
+                    file_path, input_type="image"
+                )
+
+                # Extract the predictions from the model response
+                prediction_results = model_prediction.outputs[0].data.concepts
+
+                # Get the top prediction (highest confidence)
+                if prediction_results:
+                    top_prediction = prediction_results[0]  # Get the highest confidence result
+                    recognized_name = top_prediction.name
+
+                    # Save to the database with current_user.id
+                    new_item = PantryItem(
+                        user_id=session['user_id'],  
+                        name=recognized_name,
+                        image_path=file_path,
+                        expiry_date=datetime(2024, 12, 31)  
+                    )
+                    db.session.add(new_item)
+                    db.session.commit()
+
+            except Exception as e:
+                return f"Error during AI prediction: {str(e)}", 500
+
+    # Fetch pantry items for the current user from the database
+    pantry_items = PantryItem.query.filter_by(user_id=session['user_id']).order_by(PantryItem.id.desc()).limit(4).all()
+
+    # Render the template and pass the pantry items for display
+    return render_template('index.html', pantry_items=pantry_items, recipes=[])
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -79,7 +142,8 @@ def login():
     else:
         return render_template('login.html')
     
-    
+
+@login_required
 @app.route("/logout")
 def logout():
     """Log user out"""

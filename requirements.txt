@@ -3,3 +3,4 @@ Flask-Session==0.8.0
 Flask-SQLAlchemy==3.1.1
 bcrypt==4.2.0
 SQLAlchemy==2.0.36
+tensorflow==2.18.0
