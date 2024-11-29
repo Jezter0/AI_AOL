@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Recipe Recommendations
+{% endblock %}
+
+{% block content %}
+    <h2>Recipe Recommendations</h2>
+    <div class="row" id="recipeList">
+    {% for recipe in recipes %}
+        <div class="col-md-4 mt-3">
+        <div class="card">
+            <img src="{{ recipe.image }}" class="card-img-top" alt="{{ recipe.title }}">
+            <div class="card-body">
+            <h5 class="card-title">{{ recipe.title }}</h5>
+            <p class="card-text">Ingredients: 
+                {% for ingredient in recipe.usedIngredients %}
+                {{ ingredient.name }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+            <a href="https://spoonacular.com/recipes/{{ recipe.title | replace(' ', '-') }}-{{ recipe.id }}" 
+                class="btn btn-primary" 
+                target="_blank">View Recipe</a>
+            </div>
+        </div>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock %}
