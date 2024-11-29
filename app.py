@@ -7,6 +7,8 @@ from sqlalchemy import Enum, func
 from clarifai.client.model import Model
 from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
 from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
+from pyzbar.pyzbar import decode
+from PIL import Image
 import bcrypt
 import requests
 from datetime import datetime
@@ -55,35 +57,70 @@ def index():
             # Save the uploaded file to the upload folder
             uploaded_file.save(file_path)
 
-            # Use Clarifai to recognize the food item
+            # Try to detect barcode
+            barcode_data = None
             try:
-                PAT = "ebd6c5aeea1d4656962de8aff353ffff"  # Your Clarifai API Key
-                model_url = "https://clarifai.com/clarifai/main/models/food-item-recognition"
+                image = Image.open(file_path)
+                decoded_objects = decode(image)
 
-                model_prediction = Model(url=model_url, pat=PAT).predict_by_filepath(
-                    file_path, input_type="image"
-                )
+                if decoded_objects:
+                    # Use the first barcode found
+                    barcode_data = decoded_objects[0].data.decode('utf-8')
+                    print(f"Detected Barcode: {barcode_data}")
 
-                # Extract the predictions from the model response
-                prediction_results = model_prediction.outputs[0].data.concepts
+                    # Query Open Food Facts API with the barcode
+                    response = requests.get(f"https://world.openfoodfacts.org/api/v0/product/{barcode_data}.json")
+                    if response.status_code == 200:
+                        product_info = response.json()
+                        if product_info.get('product'):
+                            recognized_name = product_info['product'].get('product_name', 'Unknown Product')
 
-                # Get the top prediction (highest confidence)
-                if prediction_results:
-                    top_prediction = prediction_results[0]  # Get the highest confidence result
-                    recognized_name = top_prediction.name
-
-                    # Save to the database with current_user.id
-                    new_item = PantryItem(
-                        user_id=session['user_id'],  
-                        name=recognized_name,
-                        image_path=file_path,
-                        expiry_date=datetime(2024, 12, 31)  
-                    )
-                    db.session.add(new_item)
-                    db.session.commit()
-
+                            # Save to the database
+                            new_item = PantryItem(
+                                user_id=session['user_id'],
+                                name=recognized_name,
+                                image_path=file_path,
+                                expiry_date=datetime(2024, 12, 31)
+                            )
+                            db.session.add(new_item)
+                            db.session.commit()
+                            flash(f"Product '{recognized_name}' added successfully!", "success")
+                            return redirect('/')
+                        else:
+                            flash("Product not found in the database.", "danger")
+                            return redirect('/')
             except Exception as e:
-                return f"Error during AI prediction: {str(e)}", 500
+                print(f"Barcode detection error: {e}")
+
+
+            if not barcode_data:
+                # Use Clarifai to recognize the food item
+                try:
+                    PAT = "ebd6c5aeea1d4656962de8aff353ffff"
+                    model_url = "https://clarifai.com/clarifai/main/models/food-item-recognition"
+
+                    model_prediction = Model(url=model_url, pat=PAT).predict_by_filepath(
+                        file_path, input_type="image"
+                    )
+                    prediction_results = model_prediction.outputs[0].data.concepts
+
+                    if prediction_results:
+                        top_prediction = prediction_results[0]
+                        recognized_name = top_prediction.name
+
+                        # Save to the database
+                        new_item = PantryItem(
+                            user_id=session['user_id'],
+                            name=recognized_name,
+                            image_path=file_path,
+                            expiry_date=datetime(2024, 12, 31)  # Placeholder expiry
+                        )
+                        db.session.add(new_item)
+                        db.session.commit()
+                        flash(f"Food item '{recognized_name}' added successfully!", "success")
+                        return redirect('/')
+                except Exception as e:
+                    return f"Error during AI prediction: {str(e)}", 500
 
     # Fetch pantry items for the current user from the database
     pantry_items = PantryItem.query.filter_by(user_id=session['user_id']).order_by(PantryItem.id.desc()).limit(4).all()
@@ -114,6 +151,30 @@ def pantry():
     pantry_items = PantryItem.query.filter_by(user_id=session['user_id'])
 
     return render_template('pantry.html', pantry_items=pantry_items)
+
+
+@app.route('/recommendation', methods=['GET'])
+@login_required
+def recommendation():
+    pantry_items = PantryItem.query.filter_by(user_id=session['user_id'])
+    pantry_ingredients = ",".join([item.name for item in pantry_items])
+
+    try:
+        response = requests.get(
+            "https://api.spoonacular.com/recipes/findByIngredients",
+            params={
+                "ingredients": pantry_ingredients,
+                "number": 50,  # Number of recipes to fetch
+                "apiKey": "0e2a90d7b5514510ac91413e1d1a9669"
+            }
+        )
+        recipes = response.json() if response.status_code == 200 else []
+
+    except Exception as e:
+        print(f"Error fetching recipes: {str(e)}")
+        recipes = []
+
+    return render_template('recommendation.html', recipes=recipes)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -175,7 +236,6 @@ def logout():
     session.clear()
 
     return redirect("/")
-
 
 
 if __name__ == '__main__':
