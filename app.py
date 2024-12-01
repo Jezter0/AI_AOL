@@ -153,6 +153,20 @@ def pantry():
     return render_template('pantry.html', pantry_items=pantry_items)
 
 
+@app.route('/pantry/<int:item_id>', methods=['DELETE'])
+@login_required
+def delete_pantry_item(item_id):
+    # Find the item to delete
+    item = PantryItem.query.filter_by(id=item_id, user_id=session['user_id']).first()
+    if not item:
+        return {"error": "Item not found or unauthorized"}, 404
+
+    # Delete the item
+    db.session.delete(item)
+    db.session.commit()
+    return {"message": "Item deleted successfully"}, 200
+
+
 @app.route('/recommendation', methods=['GET'])
 @login_required
 def recommendation():
