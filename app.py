@@ -42,6 +42,9 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
+    item_to_confirm = None
+    file_path = None
+
     if request.method == 'POST':
         uploaded_file = request.files['image']
         
@@ -60,9 +63,8 @@ def index():
                 api_key="ppadgygy71nMH5zcUypQ"
             )
 
-            # Try to detect barcode
-            barcode_data = None
             try:
+                # Try barcode detection
                 image = Image.open(file_path)
                 decoded_objects = decode(image)
 
@@ -76,55 +78,20 @@ def index():
                     if response.status_code == 200:
                         product_info = response.json()
                         if product_info.get('product'):
-                            recognized_name = product_info['product'].get('product_name', 'Unknown Product')
+                            item_to_confirm = product_info['product'].get('product_name', 'Unknown Product')
 
-                            # Save to the database
-                            new_item = PantryItem(
-                                user_id=session['user_id'],
-                                name=recognized_name,
-                                image_path=file_path,
-                                expiry_date=datetime(2024, 12, 31)
-                            )
-                            db.session.add(new_item)
-                            db.session.commit()
-                            flash(f"Product '{recognized_name}' added successfully!", "success")
-                            return redirect('/')
-                        else:
-                            flash("Product not found in the database.", "danger")
-                            return redirect('/')
-            except Exception as e:
-                print(f"Barcode detection error: {e}")
-
-
-            if not barcode_data:
-                try:
+                # If barcode detection fails, fall back to Roboflow
+                if not item_to_confirm:
                     result = client.infer(file_path, model_id="food-ingredients-dataset/3")
-                    
-                    # Extract recognized food item from the result
                     if result.get('predictions'):
-                        top_prediction = result['predictions'][0]  # Get the first prediction
-                        recognized_name = top_prediction['class']  # Class name of the prediction
-                        
-                        # Save to the database
-                        new_item = PantryItem(
-                            user_id=session['user_id'],
-                            name=recognized_name,
-                            image_path=file_path,
-                            expiry_date=datetime(2024, 12, 31)  # Placeholder expiry date
-                        )
-                        db.session.add(new_item)
-                        db.session.commit()
-                        flash(f"Food item '{recognized_name}' added successfully!", "success")
-                        return redirect('/')
-                    else:
-                        flash("Could not recognize the food item.", "danger")
-                        return redirect('/')
-                except Exception as e:
-                    flash(f"Error during Roboflow prediction: {e}", "danger")
-                    return redirect('/')
+                        top_prediction = result['predictions'][0]
+                        item_to_confirm = top_prediction['class']  # Class name of the prediction
+            except Exception as e:
+                flash(f"Error processing the image: {e}", "danger")
+                return redirect('/')
 
     # Fetch pantry items for the current user from the database
-    pantry_items = PantryItem.query.filter_by(user_id=session['user_id']).order_by(PantryItem.id.desc()).limit(4).all()
+    pantry_items = PantryItem.query.filter_by(user_id=session['user_id']).order_by(PantryItem.id.desc()).limit(6).all()
     pantry_ingredients = ",".join([item.name for item in pantry_items])
 
     try:
@@ -132,7 +99,7 @@ def index():
             "https://api.spoonacular.com/recipes/findByIngredients",
             params={
                 "ingredients": pantry_ingredients,
-                "number": 5,  # Number of recipes to fetch
+                "number": 6,  # Number of recipes to fetch
                 "apiKey": "0e2a90d7b5514510ac91413e1d1a9669"
             }
         )
@@ -142,9 +109,35 @@ def index():
         print(f"Error fetching recipes: {str(e)}")
         recipes = []
 
-    # Render the template and pass the pantry items for display
-    return render_template('index.html', pantry_items=pantry_items, recipes=recipes)
+    # Render the template with confirmation form data
+    return render_template(
+        'index.html', 
+        pantry_items=pantry_items, 
+        recipes=recipes,
+        item_to_confirm=item_to_confirm,
+        file_path=file_path
+    )
 
+
+@app.route('/add-item', methods=['POST'])
+@login_required
+def add_item():
+    # Fetch form data
+    item_name = request.form.get('name')
+    file_path = request.form.get('file_path')
+    expiry_date = request.form.get('expiry_date')
+
+    # Save the item to the database
+    new_item = PantryItem(
+        user_id=session['user_id'],
+        name=item_name,
+        image_path=file_path,
+        expiry_date=datetime.strptime(expiry_date, "%Y-%m-%d") if expiry_date else None
+    )
+    db.session.add(new_item)
+    db.session.commit()
+    flash(f"Item '{item_name}' added successfully!", "success")
+    return redirect('/')
 
 @app.route('/pantry', methods=['GET', 'POST'])
 @login_required
