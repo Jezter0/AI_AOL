@@ -3,10 +3,7 @@ import os
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Enum, func
-from clarifai.client.model import Model
-from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
-from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
+from inference_sdk import InferenceHTTPClient
 from pyzbar.pyzbar import decode
 from PIL import Image
 import bcrypt
@@ -57,6 +54,12 @@ def index():
             # Save the uploaded file to the upload folder
             uploaded_file.save(file_path)
 
+            # Initialize the Roboflow client
+            client = InferenceHTTPClient(
+                api_url="https://detect.roboflow.com", 
+                api_key="ppadgygy71nMH5zcUypQ"
+            )
+
             # Try to detect barcode
             barcode_data = None
             try:
@@ -94,33 +97,31 @@ def index():
 
 
             if not barcode_data:
-                # Use Clarifai to recognize the food item
                 try:
-                    PAT = "ebd6c5aeea1d4656962de8aff353ffff"
-                    model_url = "https://clarifai.com/clarifai/main/models/food-item-recognition"
-
-                    model_prediction = Model(url=model_url, pat=PAT).predict_by_filepath(
-                        file_path, input_type="image"
-                    )
-                    prediction_results = model_prediction.outputs[0].data.concepts
-
-                    if prediction_results:
-                        top_prediction = prediction_results[0]
-                        recognized_name = top_prediction.name
-
+                    result = client.infer(file_path, model_id="food-ingredients-dataset/3")
+                    
+                    # Extract recognized food item from the result
+                    if result.get('predictions'):
+                        top_prediction = result['predictions'][0]  # Get the first prediction
+                        recognized_name = top_prediction['class']  # Class name of the prediction
+                        
                         # Save to the database
                         new_item = PantryItem(
                             user_id=session['user_id'],
                             name=recognized_name,
                             image_path=file_path,
-                            expiry_date=datetime(2024, 12, 31)  # Placeholder expiry
+                            expiry_date=datetime(2024, 12, 31)  # Placeholder expiry date
                         )
                         db.session.add(new_item)
                         db.session.commit()
                         flash(f"Food item '{recognized_name}' added successfully!", "success")
                         return redirect('/')
+                    else:
+                        flash("Could not recognize the food item.", "danger")
+                        return redirect('/')
                 except Exception as e:
-                    return f"Error during AI prediction: {str(e)}", 500
+                    flash(f"Error during Roboflow prediction: {e}", "danger")
+                    return redirect('/')
 
     # Fetch pantry items for the current user from the database
     pantry_items = PantryItem.query.filter_by(user_id=session['user_id']).order_by(PantryItem.id.desc()).limit(4).all()
