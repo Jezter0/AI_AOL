@@ -3,7 +3,6 @@ import os
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
-from inference_sdk import InferenceHTTPClient
 from pyzbar.pyzbar import decode
 from PIL import Image
 import bcrypt
@@ -26,14 +25,15 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    pantry_items = db.relationship('PantryItem', backref='user', lazy=True)
+    pantry_items = db.relationship('PantryItem', backref='user', lazy=True, cascade='all, delete-orphan')
 
 class PantryItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
-    image_path = db.Column(db.String(200), nullable=False)
-    expiry_date = db.Column(db.Date, nullable=True)
+    image_path = db.Column(db.String(200), nullable=True)
+    expiry_date = db.Column(db.Date, nullable=True, default=None)
+    location = db.Column(db.String(50), nullable=False) 
 
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
@@ -46,22 +46,32 @@ def index():
     file_path = None
 
     if request.method == 'POST':
+        if 'manual_name' in request.form:
+            # Handle manual input of item name and storage location
+            manual_name = request.form['manual_name']
+            storage_location = request.form['storage_location']
+            
+            if manual_name and storage_location:
+                # Add the item to the user's pantry (or database)
+                new_item = PantryItem(
+                    user_id=session['user_id'],
+                    name=manual_name,
+                    location=storage_location
+                )
+                db.session.add(new_item)
+                db.session.commit()
+                flash(f"Added {manual_name} to {storage_location}.", "success")
+                return redirect('/')
+            else:
+                flash("Please provide both the item name and storage location.", "warning")
+                return redirect('/')
+        
         uploaded_file = request.files['image']
         
-        # Check if file was uploaded and has a valid extension
         if uploaded_file and uploaded_file.filename.lower().endswith(('.jpg', '.jpeg', '.png')):
-            # Generate a unique file name to avoid conflicts
             filename = uploaded_file.filename
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-            # Save the uploaded file to the upload folder
             uploaded_file.save(file_path)
-
-            # Initialize the Roboflow client
-            client = InferenceHTTPClient(
-                api_url="https://detect.roboflow.com", 
-                api_key="ppadgygy71nMH5zcUypQ"
-            )
 
             try:
                 # Try barcode detection
@@ -69,28 +79,42 @@ def index():
                 decoded_objects = decode(image)
 
                 if decoded_objects:
-                    # Use the first barcode found
                     barcode_data = decoded_objects[0].data.decode('utf-8')
-                    print(f"Detected Barcode: {barcode_data}")
-
-                    # Query Open Food Facts API with the barcode
                     response = requests.get(f"https://world.openfoodfacts.org/api/v0/product/{barcode_data}.json")
                     if response.status_code == 200:
                         product_info = response.json()
                         if product_info.get('product'):
                             item_to_confirm = product_info['product'].get('product_name', 'Unknown Product')
 
-                # If barcode detection fails, fall back to Roboflow
+                # Fall back to object detection
                 if not item_to_confirm:
-                    result = client.infer(file_path, model_id="food-ingredients-dataset/3")
-                    if result.get('predictions'):
-                        top_prediction = result['predictions'][0]
-                        item_to_confirm = top_prediction['class']  # Class name of the prediction
+                    url = "https://predict.ultralytics.com"
+                    headers = {"x-api-key": "547b2e7f9c6af7c3fff3f3d6d6e13bd53dc2368fdb"}
+                    data = {
+                        "model": "https://hub.ultralytics.com/models/JNo67oJHwrmVSx8feV7c", 
+                        "imgsz": 640,
+                        "conf": 0.25,
+                        "iou": 0.45
+                    }
+
+                    with open(file_path, "rb") as f:
+                        response = requests.post(url, headers=headers, data=data, files={"file": f})
+                    response.raise_for_status()
+                    inference_results = response.json()
+
+                    if inference_results.get("images"):
+                        results = inference_results["images"][0].get("results", [])
+                        if results:
+                            top_prediction = results[0]
+                            item_to_confirm = top_prediction.get("name")
+
+                if not item_to_confirm:
+                    flash("Could not recognize the contents of the image. Please manually enter the item name.", "warning")
+
             except Exception as e:
                 flash(f"Error processing the image: {e}", "danger")
                 return redirect('/')
 
-    # Fetch pantry items for the current user from the database
     pantry_items = PantryItem.query.filter_by(user_id=session['user_id']).order_by(PantryItem.id.desc()).limit(6).all()
     pantry_ingredients = ",".join([item.name for item in pantry_items])
 
@@ -99,17 +123,15 @@ def index():
             "https://api.spoonacular.com/recipes/findByIngredients",
             params={
                 "ingredients": pantry_ingredients,
-                "number": 6,  # Number of recipes to fetch
+                "number": 6,
                 "apiKey": "0e2a90d7b5514510ac91413e1d1a9669"
             }
         )
         recipes = response.json() if response.status_code == 200 else []
-
     except Exception as e:
         print(f"Error fetching recipes: {str(e)}")
         recipes = []
 
-    # Render the template with confirmation form data
     return render_template(
         'index.html', 
         pantry_items=pantry_items, 
@@ -122,22 +144,45 @@ def index():
 @app.route('/add-item', methods=['POST'])
 @login_required
 def add_item():
-    # Fetch form data
-    item_name = request.form.get('name')
-    file_path = request.form.get('file_path')
-    expiry_date = request.form.get('expiry_date')
+    try:
+        # Fetch form data
+        item_name = request.form.get('name', '').strip()
+        file_path = request.form.get('file_path')  # Optional image path
+        expiry_date = request.form.get('expiry_date')  # Optional expiry date
+        location = request.form.get('storage_location', '').strip()  # Added location field
 
-    # Save the item to the database
-    new_item = PantryItem(
-        user_id=session['user_id'],
-        name=item_name,
-        image_path=file_path,
-        expiry_date=datetime.strptime(expiry_date, "%Y-%m-%d") if expiry_date else None
-    )
-    db.session.add(new_item)
-    db.session.commit()
-    flash(f"Item '{item_name}' added successfully!", "success")
+        # Validate item name and location
+        if not item_name or not location:
+            flash("Item name and storage location are required.", "danger")
+            return redirect('/')
+
+        # Parse expiry date if provided
+        parsed_expiry_date = None
+        if expiry_date:
+            try:
+                parsed_expiry_date = datetime.strptime(expiry_date, "%Y-%m-%d").date()
+            except ValueError:
+                flash("Invalid expiry date format. Please use YYYY-MM-DD.", "danger")
+                return redirect('/')
+
+        # Save the item to the database
+        new_item = PantryItem(
+            user_id=session['user_id'],
+            name=item_name,
+            image_path=file_path if file_path else None,  # Handle optional image path
+            expiry_date=parsed_expiry_date,
+            location=location  # Save storage location
+        )
+        db.session.add(new_item)
+        db.session.commit()
+
+        flash(f"Item '{item_name}' added to your {location.lower()} successfully!", "success")
+    except Exception as e:
+        flash(f"An error occurred while adding the item: {e}", "danger")
+        return redirect('/')
+
     return redirect('/')
+
 
 @app.route('/pantry', methods=['GET', 'POST'])
 @login_required

@@ -169,6 +169,44 @@ h2:hover {
     border-radius: 5px;
 }
 
+/* Manual Input Form Container */
+.manual-input-form {
+    background: #f9f9f9; /* Subtle light background for contrast */
+    padding: 20px; /* Spacing inside the form */
+    border-radius: 10px; /* Rounded corners for a softer look */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    max-width: 500px; /* Limit width for better alignment */
+    margin: 0 auto; /* Center align form on the page */
+    border: 1px solid #ddd; /* Light border for definition */
+}
+
+/* Title Styling */
+.manual-form-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    text-align: center; /* Center-align title */
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Input and Select Field Styling */
+.manual-input-form .form-control {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Inner shadow for depth */
+    transition: all 0.3s ease-in-out;
+}
+
+.manual-input-form .form-control:focus {
+    border-color: #007bff; /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Highlight on focus */
+    outline: none;
+}
+
 #upload .btn-primary {
     background-color: #007bff;
     border: none;
@@ -183,6 +221,36 @@ h2:hover {
 }
 
 /* Pantry Section */
+.form-label {
+    font-size: 16px;
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 8px;
+    display: block;
+}
+
+#locationFilter {
+    width: 300px;
+    margin-bottom: 20px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#locationFilter:hover,
+#locationFilter:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+}
+
+/* Dropdown options */
+#locationFilter option {
+    font-size: 16px;
+    color: #444;
+}
+
 #pantry {
     margin-top: 40px;
 }
@@ -192,6 +260,12 @@ h2:hover {
     flex-wrap: wrap;
     justify-content: center;
     gap: 20px;
+}
+
+.pantry-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .card {
@@ -372,6 +446,10 @@ footer {
     #pantryItems, #recipeList {
         flex-direction: column;
         align-items: center;
+    }
+
+    #locationFilter {
+        width: 100%;
     }
 
     .card {

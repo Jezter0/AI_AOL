@@ -6,14 +6,29 @@
 
 {% block content %}
     <h2>My Pantry</h2>
+
+    <!-- Sorting Dropdown -->
+    <div class="mb-3">
+        <label for="locationFilter" class="form-label">Filter by Storage Location:</label>
+        <select id="locationFilter" class="form-select">
+            <option value="all" selected>All</option>
+            <option value="Pantry">Pantry</option>
+            <option value="Fridge">Fridge</option>
+            <option value="Freezer">Freezer</option>
+        </select>
+    </div>
+
     <div class="row" id="pantryItems">
         {% for item in pantry_items %}
-        <div class="col-md-3 mt-3">
+        <div class="col-md-3 mt-3 pantry-item" data-location="{{ item.location }}">
             <div class="card" data-item-id="{{ item.id }}">
                 <img src="{{ item.image_path }}" class="card-img-top" alt="{{ item.name }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ item.name }}</h5>
-                    <p class="card-text">Expires: {{ item.expiry_date }}</p>
+                    <p class="card-text">
+                        Storage: {{ item.location }}<br>
+                        Expires: {{ item.expiry_date }}
+                    </p>
                     <button class="btn btn-danger btn-sm" 
                     data-item-id="{{ item.id }}" 
                     data-item-name="{{ item.name }}"
@@ -79,6 +94,21 @@
                     console.error("Error:", error);
                 });
             }
+        });
+
+        // Filter items based on location
+        document.getElementById("locationFilter").addEventListener("change", function () {
+            const selectedLocation = this.value.toLowerCase();
+            const pantryItems = document.querySelectorAll(".pantry-item");
+
+            pantryItems.forEach(item => {
+                const itemLocation = item.getAttribute("data-location").toLowerCase();
+                if (selectedLocation === "all" || itemLocation === selectedLocation) {
+                    item.style.display = "block"; // Show the item
+                } else {
+                    item.style.display = "none"; // Hide the item
+                }
+            });
         });
     </script>
 {% endblock %}

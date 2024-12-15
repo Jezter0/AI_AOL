@@ -3,75 +3,112 @@
 {% block title %}Home - Pantry Management{% endblock %}
 
 {% block content %}
-  <section id="upload">
+<section id="upload">
     <h2 class="mb-4">Upload Food Image or Barcode</h2>
     <form action="/" method="post" enctype="multipart/form-data">
-      <!-- Accepts image files -->
-      <div class="form-group">
-        <input type="file" class="form-control-file" name="image" id="fileUpload" accept="image/*" required>
-      </div>
-      <button type="submit" class="btn btn-primary mt-2">Upload and Scan</button>
+        <!-- Accepts image files -->
+        <div class="form-group">
+            <input type="file" class="form-control-file" name="image" id="fileUpload" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Upload and Scan</button>
     </form>
-  </section>
+</section>
 
-    <!-- Confirmation Form -->
-    {% if item_to_confirm %}
-    <div class="alert alert-info">
-        <strong>Review the item below:</strong>
+<!-- Confirmation Form -->
+{% if item_to_confirm %}
+<div class="alert alert-info">
+    <strong>Review the detected item:</strong>
+</div>
+<form action="/add-item" method="POST">
+    <div class="form-group">
+        <label for="name">Item Name</label>
+        <input type="text" id="name" name="name" class="form-control" value="{{ item_to_confirm }}" required>
     </div>
-    <form action="/add-item" method="POST">
+    <div class="form-group">
+        <label for="expiry_date">Expiry Date</label>
+        <input type="date" id="expiry_date" name="expiry_date" class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="storage_location">Storage Location</label>
+        <select name="storage_location" id="storage_location" class="form-control" required>
+            <option value="" disabled selected>Select location</option>
+            <option value="Pantry">Pantry</option>
+            <option value="Fridge">Fridge</option>
+            <option value="Freezer">Freezer</option>
+        </select>
+    </div>
+    <input type="hidden" name="file_path" value="{{ file_path }}">
+    <button type="submit" class="btn btn-primary mt-3">Save Item</button>
+</form>
+{% else %}
+<div class="manual-input-form mt-4">
+    <h4 class="manual-form-title">Manually Add an Item</h4>
+    <form action="/" method="POST">
         <div class="form-group">
-            <label for="name">Item Name</label>
-            <input type="text" id="name" name="name" class="form-control" value="{{ item_to_confirm }}" required>
+            <label for="manual_name">Item Name</label>
+            <input type="text" name="manual_name" id="manual_name" class="form-control" placeholder="Enter item name" required>
         </div>
         <div class="form-group">
-            <label for="expiry_date">Expiry Date</label>
-            <input type="date" id="expiry_date" name="expiry_date" class="form-control">
+            <label for="storage_location">Storage Location</label>
+            <select name="storage_location" id="storage_location" class="form-control" required>
+                <option value="" disabled selected>Select location</option>
+                <option value="Pantry">Pantry</option>
+                <option value="Fridge">Fridge</option>
+                <option value="Freezer">Freezer</option>
+            </select>
         </div>
-        <input type="hidden" name="file_path" value="{{ file_path }}">
-        <button type="submit" class="btn btn-primary mt-3">Save Item</button>
+        <button type="submit" class="btn btn-primary">Add Item</button>
     </form>
-    {% endif %}
+</div>
+{% endif %}
 
-  <section id="pantry">
+<section id="pantry">
     <a href="/pantry"><h2>My Pantry</h2></a>
     <div class="row" id="pantryItems">
-      {% for item in pantry_items %}
+        {% for item in pantry_items %}
         <div class="col-md-3 mt-3">
-          <div class="card">
-            <img src="{{ item.image_path }}" class="card-img-top" alt="{{ item.name }}">
-            <div class="card-body">
-              <h5 class="card-title">{{ item.name }}</h5>
-              <p class="card-text">Expires: {{ item.expiry_date }}</p>
+            <div class="card">
+                <img src="{{ item.image_path or '/static/default-image.jpg' }}" class="card-img-top" alt="{{ item.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ item.name }}</h5>
+                    <p class="card-text">Expires: {{ item.expiry_date if item.expiry_date else 'N/A' }}</p>
+                    <p class="card-text">Location: {{ item.location }}</p>
+                </div>
             </div>
-          </div>
         </div>
-      {% endfor %}
+        {% else %}
+        <div class="col-12 mt-3">
+            <p>No items in your pantry. Add something to get started!</p>
+        </div>
+        {% endfor %}
     </div>
-  </section>
-  
-  <section id="recommendations" class="mt-5">
+</section>
+
+<section id="recommendations" class="mt-5">
     <a href="/recommendation"><h2>Recipe Recommendations</h2></a>
     <div class="row" id="recipeList">
-      {% for recipe in recipes %}
+        {% for recipe in recipes %}
         <div class="col-md-4 mt-3">
-          <div class="card">
-            <img src="{{ recipe.image }}" class="card-img-top" alt="{{ recipe.title }}">
-            <div class="card-body">
-              <h5 class="card-title">{{ recipe.title }}</h5>
-              <p class="card-text">Ingredients: 
-                {% for ingredient in recipe.usedIngredients %}
-                  {{ ingredient.name }}{% if not loop.last %}, {% endif %}
-                {% endfor %}
-              </p>
-              <a href="https://spoonacular.com/recipes/{{ recipe.title | replace(' ', '-') }}-{{ recipe.id }}" 
-                 class="btn btn-primary" 
-                 target="_blank">View Recipe</a>
+            <div class="card">
+                <img src="{{ recipe.image or '/static/default-recipe.jpg' }}" class="card-img-top" alt="{{ recipe.title }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ recipe.title }}</h5>
+                    <p class="card-text">Ingredients: 
+                        {% for ingredient in recipe.usedIngredients %}
+                            {{ ingredient.name }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    <a href="https://spoonacular.com/recipes/{{ recipe.title | replace(' ', '-') }}-{{ recipe.id }}" 
+                       class="btn btn-primary" 
+                       target="_blank">View Recipe</a>
+                </div>
             </div>
-          </div>
         </div>
-      {% endfor %}
+        {% else %}
+        <div class="col-12 mt-3">
+            <p>No recipes available. Add items to your pantry to get recommendations!</p>
+        </div>
+        {% endfor %}
     </div>
-  </section>
-
+</section>
 {% endblock %}
