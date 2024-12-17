@@ -42,31 +42,31 @@ print(f'MAE: {mae:.2f}')
 print(f'RMSE: {rmse:.2f}')
 print(f'R-squared score: {score:.4f}')
 
-# # Example of two-word item name
-# item_name = 'Sponge Gourd (Ghiraula)'
-# storage_location = 'Fridge'  # Just an example
-# food_category = 'Root Vegetables'  # Example category
+# Example of two-word item name
+item_name = 'Sponge Gourd -Ghiraula-'
+storage_location = 'Fridge'  # Just an example
+food_category = 'Root Vegetables'  # Example category
 
-# # Encoding the two-word item name and other input data
-# item_encoded = item_encoder.transform([item_name])[0]  # Transform the item_name to encoded value
-# food_category_encoded = food_category_encoder.transform([food_category])[0]
-# storage_encoded = storage_encoder.transform([storage_location])[0]
+# Encoding the two-word item name and other input data
+item_encoded = item_encoder.transform([item_name])[0]  # Transform the item_name to encoded value
+food_category_encoded = food_category_encoder.transform([food_category])[0]
+storage_encoded = storage_encoder.transform([storage_location])[0]
 
-# # Creating a feature array with encoded values
-# X_input = np.array([[food_category_encoded, storage_encoded, item_encoded]])
+# Creating a feature array with encoded values
+X_input = np.array([[food_category_encoded, storage_encoded, item_encoded]])
 
-# # Predicting shelf life (in days) using the trained model
-# predicted_shelf_life = regressor.predict(X_input)
-# print(f'Predicted shelf life for "{item_name}": {predicted_shelf_life[0]:.2f} days')
+# Predicting shelf life (in days) using the trained model
+predicted_shelf_life = regressor.predict(X_input)
+print(f'Predicted shelf life for "{item_name}": {predicted_shelf_life[0]:.2f} days')
 
-# Step 5: Feature importance visualization
-importances = regressor.feature_importances_
-feature_names = ['Food Category', 'Storage', 'Item']
-plt.bar(feature_names, importances, color='skyblue')
-plt.title('Feature Importance')
-plt.xlabel('Features')
-plt.ylabel('Importance')
-plt.show()
+# # Step 5: Feature importance visualization
+# importances = regressor.feature_importances_
+# feature_names = ['Food Category', 'Storage', 'Item']
+# plt.bar(feature_names, importances, color='skyblue')
+# plt.title('Feature Importance')
+# plt.xlabel('Features')
+# plt.ylabel('Importance')
+# plt.show()
 
 # Save the trained model
 joblib.dump(regressor, 'shelf_life_model.pkl')

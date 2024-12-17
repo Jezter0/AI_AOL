@@ -134,7 +134,7 @@ def predict_expiry():
     data = request.json
     item_name = data.get('item_name')
     storage_location = data.get('storage_location')
-    food_category = data.get('food_category')  # Currently unused, can extend logic
+    food_category = data.get('food_category')
 
     print("Raw inputs:", item_name, storage_location, food_category)  # Debug
 
