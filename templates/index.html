@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}Home - Pantry Management{% endblock %}
+{% block title %} Home{% endblock %}
 
 {% block content %}
 <section id="upload">
@@ -19,14 +19,10 @@
 <div class="alert alert-info">
     <strong>Review the detected item:</strong>
 </div>
-<form action="/add-item" method="POST">
+<form id="confirm-item-form" method="POST" action="/add-item">
     <div class="form-group">
         <label for="name">Item Name</label>
         <input type="text" id="name" name="name" class="form-control" value="{{ item_to_confirm }}" required>
-    </div>
-    <div class="form-group">
-        <label for="expiry_date">Expiry Date</label>
-        <input type="date" id="expiry_date" name="expiry_date" class="form-control">
     </div>
     <div class="form-group">
         <label for="storage_location">Storage Location</label>
@@ -37,28 +33,34 @@
             <option value="Freezer">Freezer</option>
         </select>
     </div>
+    <!-- Added food category dropdown -->
+    <div class="form-group">
+        <label for="food_category">Food Category</label>
+        <select name="food_category" id="food_category" class="form-control" required>
+            <option value="" disabled selected>Select category</option>
+            <option value="Fruit">Fruit</option>
+            <option value="Vegetables">Vegetables</option>
+            <option value="Root Vegetables">Root Vegetables</option>
+            <option value="Meats">Meats</option>
+            <option value="Dairy">Dairy</option>
+            <option value="Grains">Grains</option>
+            <option value="Condiments">Condiments</option>
+            <option value="Legumes">Legumes</option>
+            <option value="Herbs">Herbs</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="expiry_date_display">Expiry Date</label>
+        <input type="text" id="expiry_date_display" class="form-control" placeholder="Expiry date will appear here" readonly>
+    </div>    
+    <button type="button" id="predict-expiry-btn" class="btn btn-warning mt-3">Predict Expiry Date</button>
     <input type="hidden" name="file_path" value="{{ file_path }}">
     <button type="submit" class="btn btn-primary mt-3">Save Item</button>
 </form>
-{% else %}
-<div class="manual-input-form mt-4">
-    <h4 class="manual-form-title">Manually Add an Item</h4>
-    <form action="/" method="POST">
-        <div class="form-group">
-            <label for="manual_name">Item Name</label>
-            <input type="text" name="manual_name" id="manual_name" class="form-control" placeholder="Enter item name" required>
-        </div>
-        <div class="form-group">
-            <label for="storage_location">Storage Location</label>
-            <select name="storage_location" id="storage_location" class="form-control" required>
-                <option value="" disabled selected>Select location</option>
-                <option value="Pantry">Pantry</option>
-                <option value="Fridge">Fridge</option>
-                <option value="Freezer">Freezer</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Add Item</button>
-    </form>
+
+<!-- Expiry prediction result -->
+<div id="expiry-result" class="mt-3" style="display: none;">
+    <p>Predicted Expiry: <strong id="predicted-expiry"></strong> days</p>
 </div>
 {% endif %}
 
@@ -111,4 +113,68 @@
         {% endfor %}
     </div>
 </section>
+
+<script>
+document.getElementById('predict-expiry-btn').addEventListener('click', function() {
+    const itemName = document.getElementById('name').value;
+    const storageLocation = document.getElementById('storage_location').value;
+    const foodCategory = document.getElementById('food_category').value;
+
+    if (!itemName || !storageLocation || !foodCategory) {
+        alert('Please enter the item name, storage location, and food category.');
+        return;
+    }
+
+    fetch('/predict-expiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            item_name: itemName,
+            storage_location: storageLocation,
+            food_category: foodCategory
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.predicted_days) {
+            // Show the result
+            document.getElementById('expiry-result').style.display = 'block';
+            document.getElementById('predicted-expiry').textContent = data.predicted_days + " days";
+
+            // Calculate the expiry date
+            const today = new Date();
+            today.setDate(today.getDate() + data.predicted_days); // Add predicted days
+
+            // Format date to YYYY-MM-DD (required for input type="date")
+            const expiryDate = today.toISOString().split('T')[0];
+
+            // Populate the expiry date in a hidden input field
+            let expiryDateInput = document.getElementById('expiry_date');
+            if (!expiryDateInput) {
+                expiryDateInput = document.createElement('input');
+                expiryDateInput.type = 'hidden';
+                expiryDateInput.name = 'expiry_date';
+                expiryDateInput.id = 'expiry_date';
+                document.getElementById('confirm-item-form').appendChild(expiryDateInput);
+            }
+            expiryDateInput.value = expiryDate;
+
+            // Populate the expiry date in the visible input field (if exists)
+            const expiryDateDisplay = document.getElementById('expiry_date_display');
+            if (expiryDateDisplay) {
+                expiryDateDisplay.value = expiryDate;
+            }
+
+            console.log("Calculated Expiry Date:", expiryDate); // Debugging log
+        } else {
+            alert('Prediction failed. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error predicting expiry:', error);
+        alert('Could not predict expiry. Please try again.');
+    });
+});
+</script>
+    
 {% endblock %}

@@ -1,15 +1,22 @@
 import os
 
-from flask import Flask, request, render_template, redirect, url_for, flash, session
+from flask import Flask, request, render_template, redirect, url_for, flash, session, jsonify
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from pyzbar.pyzbar import decode
 from PIL import Image
 import bcrypt
 import requests
+import joblib
+import pandas as pd
 from datetime import datetime
 
 from helpers import login_required
+
+model = joblib.load('static/shelf_life_model.pkl')
+le_food = joblib.load('static/item_encoder.pkl')
+le_location = joblib.load('static/storage_encoder.pkl')
+le_category = joblib.load('static/food_category_encoder.pkl')
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///manager.db'
@@ -68,7 +75,7 @@ def index():
         
         uploaded_file = request.files['image']
         
-        if uploaded_file and uploaded_file.filename.lower().endswith(('.jpg', '.jpeg', '.png')):
+        if uploaded_file and uploaded_file.filename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
             filename = uploaded_file.filename
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             uploaded_file.save(file_path)
@@ -140,6 +147,38 @@ def index():
         file_path=file_path
     )
 
+
+@app.route('/predict-expiry', methods=['POST'])
+def predict_expiry():
+    data = request.json
+    item_name = data.get('item_name')
+    storage_location = data.get('storage_location')
+    food_category = data.get('food_category')  # Currently unused, can extend logic
+
+    print("Raw inputs:", item_name, storage_location, food_category)  # Debug
+
+    try:
+        # Encode inputs
+        item_encoded = le_food.transform([item_name])[0]
+        location_encoded = le_location.transform([storage_location])[0]
+        food_category_encoded = le_category.transform([food_category])[0]
+        
+        print("Encoded inputs:", item_encoded, location_encoded)  # Debug
+
+        # Prepare data for the model
+        input_data = pd.DataFrame([[item_encoded, location_encoded, food_category_encoded]],
+                          columns=['Food Category Encoded', 'Storage Encoded', 'Item Encoded'])
+        print("Model input:", input_data)  # Debug
+
+        # Make prediction
+        prediction = model.predict(input_data)
+        print("Prediction result:", prediction)  # Debug
+        
+        return jsonify({"predicted_days": int(prediction[0])})
+    except Exception as e:
+        print("Error:", e)  # Debug
+        return jsonify({"error": str(e)}), 400
+    
 
 @app.route('/add-item', methods=['POST'])
 @login_required
