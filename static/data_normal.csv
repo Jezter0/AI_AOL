@@ -11,7 +11,7 @@ Avocado,Fruits,Fridge,3
 Bacon,Meats,Fridge,7
 Bacon,Meats,Freezer,30
 Bamboo Shoots (Tama),Vegetables,Fridge,7
-Bamboo Shoots (Tama),Vegetables,"Freezer",365
+Bamboo Shoots (Tama),Vegetables,Freezer,365
 Banana,Fruits,Pantry,5
 Beans (fresh),Vegetables,Fridge,5
 Beaten Rice (Chiura),Grains,Pantry,273
@@ -155,11 +155,11 @@ Sweet Potato (Suthuni),Root Vegetables,Pantry,10.5
 Sweet Potato (Suthuni),Root Vegetables,Fridge,30
 Taro Leaves (Karkalo),Vegetables,Fridge,1.5
 Taro Root (Pidalu),Root Vegetables,Pantry,10.5
-Taro Root (Pidalu),Root Vegetables,Fridge,17.5
-Thukpa Noodles,Grains,Pantry,273
+Tarkpo Root (Pidalu),Root Vegetables,Fridge,17.5
+Thua Noodles,Grains,Pantry,273
 Thukpa Noodles,Grains,Fridge,4
-Tofu,Dairy,Fridge,4 
-Tofu (Opened),Dairy,Fridge,1.5 
+Tofu,Dairy,Fridge,4
+Tofu (Opened),Dairy,Fridge,1.5
 Tomato,Vegetables,Fridge,10.5
 Tomato,Vegetables,Pantry,4
 Tori ko Saag,Vegetables,Fridge,4
