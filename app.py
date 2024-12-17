@@ -53,25 +53,6 @@ def index():
     file_path = None
 
     if request.method == 'POST':
-        if 'manual_name' in request.form:
-            # Handle manual input of item name and storage location
-            manual_name = request.form['manual_name']
-            storage_location = request.form['storage_location']
-            
-            if manual_name and storage_location:
-                # Add the item to the user's pantry (or database)
-                new_item = PantryItem(
-                    user_id=session['user_id'],
-                    name=manual_name,
-                    location=storage_location
-                )
-                db.session.add(new_item)
-                db.session.commit()
-                flash(f"Added {manual_name} to {storage_location}.", "success")
-                return redirect('/')
-            else:
-                flash("Please provide both the item name and storage location.", "warning")
-                return redirect('/')
         
         uploaded_file = request.files['image']
         

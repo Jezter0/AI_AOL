@@ -1,0 +1,181 @@
+Item,Food Category,Storage,Shelf Life (in Days)
+Akabare Khursani (Chili peppers),Vegetables,Fridge,11
+Apple,Fruits,Fridge,35
+Apple,Fruits,Pantry,11
+Artichoke,Vegetables,Fridge,6
+Ash Gourd (Kubhindo),Vegetables,Pantry,30
+Ash Gourd (Kubhindo),Vegetables,Fridge (cut pieces),11
+Asparagus (Kurilo),Vegetables,Fridge,4
+Avocado,Fruits,Pantry (until ripe),5
+Avocado,Fruits,Fridge (after ripening),3
+Bacon,Meats,Fridge,7
+Bacon,Meats,Freezer,30
+Bamboo Shoots (Tama),Vegetables,Fridge (fresh),7
+Bamboo Shoots (Tama),Vegetables,"Freezer (processed, unopened)",365
+Banana,Fruits,Pantry,5
+Beans (fresh),Vegetables,Fridge,5
+Beaten Rice (Chiura),Grains,Pantry,273
+Beef,Meats,Fridge,4
+Beef,Meats,Freezer,273
+Beetroot,Vegetables,Fridge,18
+Bethu ko Saag,Vegetables,Fridge,2
+Bitter Gourd,Vegetables,Fridge,5
+Black Lentils,Legumes,Pantry (airtight container),365
+Black Beans,Legumes,Pantry (dry),365
+Black Beans,Legumes,Fridge (cooked),4
+Bottle Gourd (Lauka),Vegetables,Fridge,11
+Bread,Grains,Pantry,4
+Bread,Grains,Freezer,75
+Brinjal (Eggplant),Vegetables,Fridge,6
+Broad Beans (Bakullo),Vegetables,Fridge,4
+Broccoli,Vegetables,Fridge,4
+Buff Meat,Meats,Fridge,3
+Buff Meat,Meats,Freezer,273
+Butter,Dairy,Fridge,60
+Butter,Dairy,Freezer,225
+Cabbage,Vegetables,Fridge,11
+Capsicum,Vegetables,Fridge,11
+Carrot,Vegetables,Fridge,18
+Cassava (Ghar Tarul),Root Vegetables,Pantry,11
+Cassava (Ghar Tarul),Root Vegetables,Freezer (peeled and frozen),75
+Cauliflower,Vegetables,Fridge,11
+Chayote (Iskus),Vegetables,Fridge,18
+Cheese,Dairy,Fridge,17
+Cheese,Dairy,Freezer (hard cheeses),180
+Chicken,Meats,Fridge,3
+Chicken,Meats,Freezer,273
+Chicken Gizzards,Meats,Fridge,3
+Chicken Gizzards,Meats,Freezer,105
+Chickpeas,Legumes,Pantry (dry),365
+Chickpeas,Legumes,Fridge (cooked),4
+Chili Pepper (Khursani),Vegetables,Fridge,11
+Chili Powder,Spices,Pantry (airtight container),273
+Chowmein Noodles,Grains,Pantry (dry),365
+Chowmein Noodles,Grains,Fridge (cooked),4
+Cinnamon,Spices,Pantry (airtight container),548
+Coriander (Dhaniya),Herbs,Fridge (fresh),5
+Coriander (Dhaniya),Herbs,Pantry (dry seeds/powder),365
+Corn,Vegetables,Fridge (fresh),4
+Corn,Vegetables,Freezer,303
+Cornflakes,Grains,Pantry,273
+Crab Meat,Meats,Fridge,3
+Crab Meat,Meats,Freezer,120
+Cucumber,Vegetables,Fridge,7
+Egg,Dairy,Fridge,21
+Farsi ko Munta (Pumpkin Shoots),Vegetables,Fridge,2
+Fiddlehead Ferns (Niguro),Vegetables,Fridge,2
+Fish,Meats,Fridge,2
+Fish,Meats,Freezer,90
+Garden Peas,Vegetables,Fridge,4
+Garden Peas,Vegetables,Freezer,303
+Garden Cress (Chamsur ko Saag),Vegetables,Fridge,2
+Garlic,Vegetables,Pantry (whole),150
+Garlic,Vegetables,Fridge (peeled/minced),7
+Ginger,Vegetables,Fridge,21
+Ginger,Vegetables,Freezer,180
+Green Brinjal,Vegetables,Fridge,6
+Green Lentils,Legumes,Pantry (dry),365
+Green Lentils,Legumes,Fridge (cooked),4
+Green Mint (Pudina),Herbs,Fridge,5
+Green Peas,Vegetables,Fridge,4
+Green Peas,Vegetables,Freezer,303
+Green Soyabean (Hariyo Bhatmas),Legumes,Fridge,4
+Green Soyabean (Hariyo Bhatmas),Legumes,Freezer,240
+Gundruk,Fermented Foods,Pantry (dry),365
+Gundruk,Fermented Foods,Fridge (prepared),4
+Ham,Meats,Fridge,4
+Ham,Meats,Freezer,60
+Ice,Frozen Foods,Freezer,9999
+Jack Fruit,Fruits,Pantry (whole),6
+Jack Fruit,Fruits,Fridge (cut),3
+Ketchup,Condiments,Pantry (unopened),365
+Ketchup,Condiments,Fridge (opened),60
+Lapsi (Nepali Hog Plum),Fruits,Fridge,11
+Lapsi (Nepali Hog Plum),Fruits,Freezer,240
+Lemon (Nimbu),Fruits,Fridge,28
+Lemon (Nimbu),Fruits,Pantry,11
+Lime (Kagati),Fruits,Fridge,28
+Lime (Kagati),Fruits,Pantry,11
+Long Beans (Bodi),Vegetables,Fridge,6
+Masyaura,Grains,Pantry,365
+Milk,Dairy,Fridge,7
+Minced Meat,Meats,Fridge,2
+Minced Meat,Meats,Freezer,100
+Moringa Leaves (Sajyun ko Munta),Vegetables,Fridge,2
+Mushroom,Vegetables,Fridge,3
+Mutton,Meats,Fridge,3
+Mutton,Meats,Freezer,180
+Nutrela (Soya Chunks),Legumes,Pantry (dry),365
+Nutrela (Soya Chunks),Legumes,Fridge (cooked),5
+Okra (Bhindi),Vegetables,Fridge,6
+Olive Oil,Oils,Pantry (airtight container),540
+Onion,Vegetables,Pantry,50
+Onion Leaves,Vegetables,Fridge,50
+Orange,Fruits,Fridge,21
+Orange,Fruits,Pantry,14
+Palak (Indian Spinach),Vegetables,Fridge,5
+Palungo (Nepali Spinach),Vegetables,Fridge,4
+Paneer,Dairy,Fridge,7
+Papaya,Fruits,Pantry (until ripe),7
+Papaya,Fruits,Fridge (ripe),3
+Pea,Vegetables,Fridge,5
+Pea,Vegetables,Freezer,300
+Pear,Fruits,Fridge,14
+Pear,Fruits,Pantry,5
+Pointed Gourd (Chuche Karela),Vegetables,Fridge,6
+Pork,Meats,Fridge,3
+Pork,Meats,Freezer,180
+Potato,Root Vegetables,Pantry,60
+Pumpkin (Farsi),Vegetables,Pantry (whole),90
+Pumpkin (Farsi),Vegetables,Fridge (cut),7
+Radish,Vegetables,Fridge,10.5
+Rahar ko Daal (Pigeon Pea Lentils),Legumes,Pantry (dry),365
+Rahar ko Daal (Pigeon Pea Lentils),Legumes,Fridge (cooked),4
+Rayo ko Saag,Vegetables,Fridge,4
+Red Beans,Legumes,Pantry (dry),365
+Red Beans,Legumes,Fridge (cooked),4
+Red Lentils,Legumes,Pantry (dry),365
+Red Lentils,Legumes,Fridge (cooked),4
+Rice (Chamal),Grains,Pantry (uncooked),365
+Rice (Chamal),Grains,Fridge (cooked),4
+Sajyun (Moringa Drumsticks),Vegetables,Fridge,4
+Salt,Condiments,Pantry (airtight container),9999
+Sausage,Meats,Fridge,7
+Sausage,Meats,Freezer,45
+Snake Gourd (Chichindo),Vegetables,Fridge,6
+Soy Sauce,Condiments,Pantry (unopened),365
+Soy Sauce,Condiments,Fridge (opened),45
+Soyabean (Bhatmas),Legumes,Pantry (dry),365
+Soyabean (Bhatmas),Legumes,Fridge (cooked),4
+Sponge Gourd (Ghiraula),Vegetables,Fridge,7
+Stinging Nettle (Sisnu),Vegetables,Fridge,1.5
+Strawberry,Fruits,Fridge,5
+Sugar,Condiments,Pantry (airtight container),9999
+Sweet Potato (Suthuni),Root Vegetables,Pantry,10.5
+Sweet Potato (Suthuni),Root Vegetables,Fridge,30
+Taro Leaves (Karkalo),Vegetables,Fridge,1.5
+Taro Root (Pidalu),Root Vegetables,Pantry,10.5
+Taro Root (Pidalu),Root Vegetables,Fridge,17.5
+Thukpa Noodles,Grains,Pantry (dry),273
+Thukpa Noodles,Grains,Fridge (cooked),4
+Tofu,Dairy,Fridge,4 
+Tofu (Opened),Dairy,Fridge,1.5 
+Tomato,Vegetables,Fridge (ripe),10.5
+Tomato,Vegetables,Pantry (unripe),4
+Tori ko Saag,Vegetables,Fridge,4
+Tree Tomato (Rukh Tamatar),Fruits,Fridge,10.5
+Turnip,Vegetables,Fridge,17.5
+Walnut,Nuts,Pantry,365
+Walnut,Nuts,Fridge,365
+Watermelon,Fruits,Pantry (whole),7
+Watermelon,Fruits,Fridge (whole),14
+Watermelon,Fruits,,4
+Wheat,Grains,Pantry,365
+Yellow Lentils,Legumes,Pantry (dry),365
+Watermelon,Fruits,Fridge (cooked),4
+Kimchi,Fermented Foods,Fridge,180
+Mayonnaise,Condiments,Fridge,30
+Noodle,Grains,Pantry (dry),273
+Noodle,Grains,Fridge (cooked),4
+Seaweed,Seafood,Pantry (dry),365
+Seaweed,Seafood,Fridge (fresh),4
