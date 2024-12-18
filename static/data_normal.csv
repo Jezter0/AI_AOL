@@ -85,7 +85,7 @@ Gundruk,Fermented Foods,Pantry,365
 Gundruk,Fermented Foods,Fridge,4
 Ham,Meats,Fridge,4
 Ham,Meats,Freezer,60
-Ice,Frozen Foods,Freezer,9999
+Ice,Frozen Foods,Freezer,365
 Jack Fruit,Fruits,Pantry,6
 Jack Fruit,Fruits,Fridge,3
 Ketchup,Condiments,Pantry,365
@@ -139,7 +139,7 @@ Red Lentils,Legumes,Fridge,4
 Rice -Chamal-,Grains,Pantry,365
 Rice -Chamal-,Grains,Fridge,4
 Sajyun -Moringa Drumsticks-,Vegetables,Fridge,4
-Salt,Condiments,Pantry,9999
+Salt,Condiments,Pantry,365
 Sausage,Meats,Fridge,7
 Sausage,Meats,Freezer,45
 Snake Gourd -Chichindo-,Vegetables,Fridge,6
@@ -150,7 +150,7 @@ Soyabean -Bhatmas-,Legumes,Fridge,4
 Sponge Gourd -Ghiraula-,Vegetables,Fridge,7
 Stinging Nettle -Sisnu-,Vegetables,Fridge,1.5
 Strawberry,Fruits,Fridge,5
-Sugar,Condiments,Pantry,9999
+Sugar,Condiments,Pantry,365
 Sweet Potato -Suthuni-,Root Vegetables,Pantry,10.5
 Sweet Potato -Suthuni-,Root Vegetables,Fridge,30
 Taro Leaves -Karkalo-,Vegetables,Fridge,1.5

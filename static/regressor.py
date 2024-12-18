@@ -59,14 +59,14 @@ X_input = np.array([[food_category_encoded, storage_encoded, item_encoded]])
 predicted_shelf_life = regressor.predict(X_input)
 print(f'Predicted shelf life for "{item_name}": {predicted_shelf_life[0]:.2f} days')
 
-# # Step 5: Feature importance visualization
-# importances = regressor.feature_importances_
-# feature_names = ['Food Category', 'Storage', 'Item']
-# plt.bar(feature_names, importances, color='skyblue')
-# plt.title('Feature Importance')
-# plt.xlabel('Features')
-# plt.ylabel('Importance')
-# plt.show()
+# Step 5: Feature importance visualization
+importances = regressor.feature_importances_
+feature_names = ['Food Category', 'Storage', 'Item']
+plt.bar(feature_names, importances, color='skyblue')
+plt.title('Feature Importance')
+plt.xlabel('Features')
+plt.ylabel('Importance')
+plt.show()
 
 # Save the trained model
 joblib.dump(regressor, 'shelf_life_model.pkl')
