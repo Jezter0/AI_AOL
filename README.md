@@ -1,4 +1,4 @@
-# Flask Application
+# PantryPal
 
 This project is a Flask-based web application that includes features such as barcode scanning, food expiration prediction, and a user-friendly interface.
 
